@@ -23,6 +23,7 @@ h1{font-family:'Great Vibes',cursive;font-size:44px;text-align:center;color:var(
 .cell img{width:100%;aspect-ratio:1;object-fit:cover;display:block;cursor:pointer}
 .cell .meta{font-size:10.5px;color:var(--sub);padding:6px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cell a.dl{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.92);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--deep);font-size:14px}
+.cell button.del{position:absolute;top:6px;left:6px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.92);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:#C0564F;font-size:13px;cursor:pointer}
 .empty{text-align:center;color:var(--sub);padding:80px 0;font-size:14px}
 .msg-sec{margin-top:70px}
 h2{font-family:'Great Vibes',cursive;font-size:32px;text-align:center;color:var(--rose);font-weight:400;margin-bottom:20px}
@@ -108,9 +109,19 @@ async function load(){
     return '<div class="cell">'
       + '<img loading="lazy" src="' + url + '" onclick="openViewer(\'' + url + '\')" alt="">'
       + '<a class="dl" href="' + url + '?download" download="' + esc(f.name) + '" title="다운로드">⤓</a>'
+      + '<button class="del" onclick="delPhoto(\'' + encodeURIComponent(f.name) + '\', \'' + esc(who) + '\')" title="삭제">✕</button>'
       + '<div class="meta">' + esc(who) + '</div>'
       + '</div>';
   }).join('');
+}
+
+async function delPhoto(encName, who){
+  const fname = decodeURIComponent(encName);
+  if(!confirm(who + ' 님이 올린 사진을 삭제할까요?\n삭제하면 되돌릴 수 없어요.')) return;
+  const r = await fetch(SUPABASE_URL + '/storage/v1/object/' + SB_BUCKET + '/' + encName,
+    { method: 'DELETE', headers: H });
+  if(r.ok){ load(); }
+  else{ alert('삭제에 실패했어요. 잠시 후 다시 시도해주세요.'); }
 }
 
 function openViewer(url){
