@@ -649,48 +649,12 @@ document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
   tick(); setInterval(tick, 1000);
 })();
 
-/* ── 갤러리 dots + 라이트박스 ── */
+/* ── 갤러리: 탭 → 확대 ── */
 var gtrack = document.getElementById('gtrack'),
     gitems = gtrack.querySelectorAll('.g-item'),
     lbIdx = 0;
-/* 갤러리: 탭=확대, 더블탭=좋아요(인스타 스타일) */
-var LIKE_KEY = 'wedding_likes', likes = {};
-try{ likes = JSON.parse(localStorage.getItem(LIKE_KEY)) || {}; }catch(e){}
 gitems.forEach(function(item, i){
-  var burst = document.createElement('div');
-  burst.className = 'g-burst'; burst.innerHTML = '<span>♥</span>';
-  var btn = document.createElement('button');
-  btn.className = 'g-like'; btn.setAttribute('aria-label','좋아요');
-  item.appendChild(burst); item.appendChild(btn);
-  function setUI(){
-    btn.textContent = likes[i] ? '♥' : '♡';
-    btn.classList.toggle('liked', !!likes[i]);
-  }
-  setUI();
-  function setLike(on){
-    likes[i] = (on === undefined) ? !likes[i] : on;
-    if(!likes[i]) delete likes[i];
-    try{ localStorage.setItem(LIKE_KEY, JSON.stringify(likes)); }catch(e){}
-    setUI();
-  }
-  function doPop(){
-    item.classList.remove('pop'); void item.offsetWidth; item.classList.add('pop');
-  }
-  btn.addEventListener('click', function(e){
-    e.stopPropagation(); setLike();
-    if(likes[i]) doPop();
-  });
-  var lastTap = 0, tapTimer;
-  item.addEventListener('click', function(){
-    var now = Date.now();
-    if(now - lastTap < 300){           // 더블탭 → 좋아요
-      clearTimeout(tapTimer); lastTap = 0;
-      setLike(true); doPop();
-    } else {                            // 싱글탭 → 확대 (더블탭 대기)
-      lastTap = now;
-      tapTimer = setTimeout(function(){ openLb(i); }, 300);
-    }
-  });
+  item.addEventListener('click', function(){ openLb(i); });
 });
 function openLb(i){
   lbIdx = i;
