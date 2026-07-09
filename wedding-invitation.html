@@ -236,6 +236,14 @@ footer .thanks{font-size:13px;color:var(--sub);margin:14px 0 30px;line-height:2}
 /* ── 토스트 ── */
 #toast{position:fixed;bottom:40px;left:50%;transform:translate(-50%,20px);background:rgba(60,40,43,.9);color:#fff;padding:12px 26px;border-radius:30px;font-size:13px;opacity:0;transition:.4s;z-index:300;pointer-events:none;white-space:nowrap}
 #toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ── BGM 음소거 버튼 ── */
+#bgm-btn{position:fixed;right:16px;bottom:18px;z-index:90;width:42px;height:42px;border-radius:50%;border:1px solid var(--blush);background:rgba(255,255,255,.92);color:var(--rose);font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 12px rgba(123,75,82,.16);transition:transform .2s,opacity .3s,color .3s;-webkit-tap-highlight-color:transparent;font-family:inherit}
+#bgm-btn:active{transform:scale(.9)}
+#bgm-btn.playing{animation:bgmPulse 2.6s ease-in-out infinite}
+#bgm-btn.muted{color:var(--sub);opacity:.7}
+#bgm-btn.muted::after{content:'';position:absolute;left:9px;right:9px;top:50%;height:1.5px;background:var(--sub);transform:rotate(-45deg)}
+@keyframes bgmPulse{0%,100%{box-shadow:0 3px 12px rgba(201,132,140,.18)}50%{box-shadow:0 3px 16px rgba(201,132,140,.42)}}
 </style>
 </head>
 <body>
@@ -916,6 +924,36 @@ function sendRsvp(){
     toast('전송에 실패했어요. 잠시 후 다시 시도해주세요');
   });
 }
+
+/* ── BGM 자동재생 + 음소거 버튼 ── */
+(function(){
+  var a = document.getElementById('bgm'), btn = document.getElementById('bgm-btn');
+  if(!a || !btn) return;
+  a.volume = 0.45;
+  function setBtn(){
+    if(a.paused || a.muted){ btn.classList.add('muted'); btn.classList.remove('playing'); }
+    else { btn.classList.remove('muted'); btn.classList.add('playing'); }
+  }
+  function tryPlay(){ var p = a.play(); if(p && p.catch) p.catch(function(){}); }
+  window.toggleBgm = function(){
+    if(a.paused){ a.muted = false; tryPlay(); }
+    else { a.muted = !a.muted; }
+    setBtn();
+  };
+  a.addEventListener('play', setBtn);
+  a.addEventListener('pause', setBtn);
+  // 로드 시 자동재생 시도(대부분 브라우저는 제스처 전까지 차단)
+  tryPlay();
+  // 첫 사용자 상호작용(인트로 탭 등) 시 재생 시작
+  function onFirst(){ tryPlay(); setBtn(); }
+  ['click','touchstart','keydown'].forEach(function(ev){
+    document.addEventListener(ev, onFirst, {once:true, passive:true});
+  });
+  setBtn();
+})();
 </script>
+  <!-- BGM -->
+  <audio id="bgm" src="bgm.mp3" loop preload="auto"></audio>
+  <button id="bgm-btn" class="muted" aria-label="배경음악 켜기/끄기" onclick="toggleBgm()">&#9835;</button>
 </body>
 </html>
