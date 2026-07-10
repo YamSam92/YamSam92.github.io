@@ -925,11 +925,12 @@ function sendRsvp(){
   });
 }
 
-/* ── BGM 자동재생 + 음소거 버튼 ── */
+/* ── BGM: 자동재생(첫 터치 시) + 음소거 버튼, 모바일 대응 ── */
 document.addEventListener('DOMContentLoaded', function(){
   var a = document.getElementById('bgm'), btn = document.getElementById('bgm-btn');
   if(!a || !btn) return;
   a.volume = 0.45;
+  a.setAttribute('playsinline','');
   function setBtn(){
     if(a.paused || a.muted){ btn.classList.add('muted'); btn.classList.remove('playing'); }
     else { btn.classList.remove('muted'); btn.classList.add('playing'); }
@@ -942,12 +943,22 @@ document.addEventListener('DOMContentLoaded', function(){
   };
   a.addEventListener('play', setBtn);
   a.addEventListener('pause', setBtn);
-  // 로드 시 자동재생 시도(대부분 브라우저는 제스처 전까지 차단)
-  tryPlay();
+  a.addEventListener('error', setBtn);
+  // iOS Safari 등에서 audio/mp3 Content-Type/스트리밍 스톨 회피:
+  // 파일을 받아 audio/mpeg Blob(Object URL)로 교체해 재생 안정성 확보
+  fetch('bgm.mp3').then(function(r){ return r.blob(); }).then(function(b){
+    try{
+      var url = URL.createObjectURL(new Blob([b], {type:'audio/mpeg'}));
+      var wasPlaying = !a.paused;
+      a.src = url;
+      a.load();
+      if(wasPlaying) tryPlay();   // 첫 제스처로 이미 언락된 경우 이어서 재생
+    }catch(e){}
+  }).catch(function(){});
   // 첫 사용자 상호작용(인트로 탭 등) 시 재생 시작
   function onFirst(){ tryPlay(); setBtn(); }
-  ['click','touchstart','keydown'].forEach(function(ev){
-    document.addEventListener(ev, onFirst, {once:true, passive:true});
+  ['pointerdown','touchend','click','keydown'].forEach(function(ev){
+    document.addEventListener(ev, onFirst, {once:true});
   });
   setBtn();
 });
