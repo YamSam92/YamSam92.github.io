@@ -926,7 +926,7 @@ function sendRsvp(){
 }
 
 /* ── BGM 자동재생 + 음소거 버튼 ── */
-(function(){
+document.addEventListener('DOMContentLoaded', function(){
   var a = document.getElementById('bgm'), btn = document.getElementById('bgm-btn');
   if(!a || !btn) return;
   a.volume = 0.45;
@@ -950,7 +950,7 @@ function sendRsvp(){
     document.addEventListener(ev, onFirst, {once:true, passive:true});
   });
   setBtn();
-})();
+});
 </script>
   <!-- BGM -->
   <audio id="bgm" src="bgm.mp3" loop preload="auto"></audio>
