@@ -380,18 +380,18 @@ footer .thanks{font-size:13px;color:var(--sub);margin:14px 0 30px;line-height:2}
     <div class="venue-card reveal d1">
       <h3>행복한 웨딩홀 2층 사랑홀</h3>
       <p class="addr">충청남도 보령시 남포면 보령남로 195</p>
-      <p class="addr" style="font-size:12.5px">Tel. 041-123-4567</p>
+      <p class="addr" style="font-size:12.5px">Tel. <a href="tel:041-934-3500" style="color:inherit;text-decoration:none">041-934-3500</a></p>
       <button class="copy-mini" onclick="copyText('충청남도 보령시 남포면 보령남로 195','주소가 복사되었습니다')">주소 복사</button>
       <div class="map-embed"><iframe id="gmap" title="오시는 길 지도" loading="lazy" allowfullscreen></iframe></div>
       <div class="map-btns">
-        <a href="https://map.kakao.com/link/search/보령 행복한 웨딩홀" target="_blank">카카오맵</a>
-        <a href="https://map.naver.com/v5/search/보령 행복한 웨딩홀" target="_blank">네이버지도</a>
-        <a href="https://tmap.life/route/search?name=행복한 웨딩홀" target="_blank">티맵</a>
+        <a href="https://map.kakao.com/link/search/충청남도 보령시 남포면 보령남로 195" target="_blank">카카오맵</a>
+        <a href="https://map.naver.com/v5/search/보령시 남포면 보령남로 195" target="_blank">네이버지도</a>
+        <a href="tmap://search?name=행복한웨딩홀" onclick="return openTmap(event)">티맵</a>
       </div>
       <dl class="transport">
-        <dt>🚄 기차</dt><dd>장항선 대천역 하차 → 택시 약 10분</dd>
-        <dt>🚌 버스</dt><dd>보령종합터미널 하차 → 시내버스 100번 · 웨딩홀 앞 정류장</dd>
-        <dt>🚗 자가용</dt><dd>서해안고속도로 대천IC → 웨딩홀 주차장 무료 이용</dd>
+        <dt>🚄 기차</dt><dd>대천역 하차 → 택시 약 6분</dd>
+        <dt>🚌 버스</dt><dd>보령종합터미널 하차 → 택시 약 8분</dd>
+        <dt>🚗 자가용</dt><dd>웨딩홀 주차장 이용 가능</dd>
       </dl>
     </div>
   </section>
@@ -814,6 +814,17 @@ function toggleAcc(btn){
   var g = btn.parentElement, body = g.querySelector('.acc-body');
   var open = g.classList.toggle('open');
   body.style.maxHeight = open ? body.scrollHeight + 'px' : '0';
+}
+
+/* ── 티맵 열기(모바일 앱 스킴, 실패 시 카카오맵 폴백) ── */
+function openTmap(e){
+  e.preventDefault();
+  var t = setTimeout(function(){
+    window.open('https://map.kakao.com/link/search/충청남도 보령시 남포면 보령남로 195','_blank');
+  }, 1200);
+  window.addEventListener('pagehide', function(){ clearTimeout(t); }, {once:true});
+  location.href = 'tmap://search?name=' + encodeURIComponent('행복한웨딩홀');
+  return false;
 }
 
 /* ── 모달 ── */
