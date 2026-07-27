@@ -45,30 +45,45 @@ section{padding:70px 26px;position:relative}
 .divider{width:36px;height:1px;background:var(--rose);margin:22px auto;position:relative}
 .divider::after{content:'❀';position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--bg);padding:0 8px;color:var(--rose);font-size:12px}
 
-/* ── 인트로: 봉투 개봉 ── */
-#intro{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;justify-content:center;align-items:center;transition:opacity 1.1s ease,visibility 1.1s;cursor:pointer;padding:30px}
+/* ── 인트로 오버레이: 반지 박스 ── */
+#intro{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;justify-content:center;align-items:center;transition:opacity 1.2s ease,visibility 1.2s;cursor:pointer}
 #intro.hide{opacity:0;visibility:hidden}
-.env-stage{position:relative;width:100%;max-width:330px;height:545px;perspective:900px;-webkit-perspective:900px;overflow:hidden;border-radius:12px}
-.letter{position:absolute;left:8px;right:8px;top:0;background:#FFFDFB;border:1px solid var(--blush);border-radius:14px;box-shadow:0 14px 34px rgba(123,75,82,.16);padding:16px 16px 22px;text-align:center;z-index:1;transform:translateY(235px) scale(.58);transform-origin:center top}
-.env-stage.open .letter{animation:letterUp 1.5s .55s cubic-bezier(.2,.7,.2,1) forwards}
-@keyframes letterUp{0%{transform:translateY(235px) scale(.58);z-index:1}49%{z-index:1}50%{z-index:6}100%{transform:translateY(0) scale(1);z-index:6}}
-.letter img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;display:block}
-.letter .lt-script{font-family:'Great Vibes',cursive;font-size:26px;color:var(--rose);margin:16px 0 6px}
-.letter .lt-names{font-size:18px;letter-spacing:2px;color:var(--deep);font-weight:700}
-.letter .lt-date{margin-top:9px;font-size:12px;letter-spacing:2px;color:var(--sub)}
-.env-pocket{position:absolute;left:0;right:0;bottom:0;height:206px;background:linear-gradient(180deg,#FBF0EC,#F5E1DA);border:1px solid #EFD6CE;border-radius:12px;z-index:3;box-shadow:0 14px 30px rgba(123,75,82,.16);overflow:hidden}
-.env-pocket::before,.env-pocket::after{content:'';position:absolute;top:-1px;width:75%;height:1px;background:#EBD0C7}
-.env-pocket::before{left:-6%;transform:rotate(24deg);transform-origin:left top}
-.env-pocket::after{right:-6%;transform:rotate(-24deg);transform-origin:right top}
-.env-flapv{position:absolute;left:0;right:0;bottom:calc(206px - 104px);height:104px;background:linear-gradient(180deg,#FCF3EF,#F6E5DE);border:1px solid #EFD6CE;border-top:none;clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top center;backface-visibility:hidden;-webkit-backface-visibility:hidden;z-index:4}
-.env-stage.open .env-flapv{animation:flapOpen .85s .1s cubic-bezier(.5,.05,.4,1) forwards}
-@keyframes flapOpen{0%{transform:rotateX(0);z-index:4}59%{z-index:4}60%{z-index:2}100%{transform:rotateX(180deg);z-index:2}}
-.wax-img{position:absolute;left:50%;bottom:72px;transform:translateX(-50%) rotate(-4deg);width:90px;height:auto;z-index:5;filter:drop-shadow(0 7px 14px rgba(169,96,105,.38));transition:opacity .5s .25s,transform .5s .25s}
-.env-stage.open .wax-img{opacity:0;transform:translateX(-50%) rotate(-4deg) scale(.6)}
-.intro-hint{margin-top:22px;font-size:12px;letter-spacing:4px;color:var(--sub);animation:hintPulse 2.4s 1s infinite}
-#intro .env-stage.open ~ .intro-hint{opacity:0;transition:opacity .4s}
+.intro-names{font-family:'Great Vibes',cursive;font-size:40px;color:var(--rose);margin-bottom:40px;opacity:0;animation:introFade 1.4s .2s forwards}
+@keyframes introFade{to{opacity:1}}
+#ringbox{position:relative;width:150px;height:132px;opacity:0;animation:introFade 1.4s .6s forwards}
+.rb-inner{position:absolute;left:6px;top:6px;width:138px;height:48px;background:radial-gradient(ellipse at 50% 30%,#3A2226,#1E1114);border-radius:12px 12px 4px 4px;z-index:1;box-shadow:inset 0 -5px 12px rgba(0,0,0,.65)}
+.rb-ring{position:absolute;top:34px;left:50%;width:36px;height:36px;margin-left:-18px;border-radius:50%;border:5px solid #E9C48A;box-shadow:inset 0 0 0 1px #B8905A,0 2px 10px rgba(233,196,138,.7);z-index:4;opacity:0;transform:translateY(14px) scale(.55);transition:all .9s .55s cubic-bezier(.2,.8,.3,1.25)}
+.rb-lid{position:absolute;left:0;top:0;width:150px;height:56px;background:linear-gradient(165deg,#B23B49,#8E2B38);border-radius:16px 16px 6px 6px;transform-origin:top center;transition:transform 1s cubic-bezier(.55,-.15,.35,1.1),opacity 1s;z-index:5;box-shadow:0 4px 12px rgba(120,30,40,.3)}
+.rb-lid::after{content:'';position:absolute;left:14px;right:14px;bottom:9px;height:2px;background:rgba(233,196,138,.85);border-radius:2px}
+.rb-base{position:absolute;left:0;bottom:0;width:150px;height:76px;background:linear-gradient(200deg,#A63744,#7E2431);border-radius:6px 6px 16px 16px;z-index:3;box-shadow:inset 0 6px 12px rgba(0,0,0,.22),0 14px 28px rgba(120,30,40,.25)}
+.rb-base::after{content:'';position:absolute;left:14px;right:14px;top:9px;height:2px;background:rgba(233,196,138,.6);border-radius:2px}
+.rb-glow{position:absolute;top:-36px;left:50%;width:160px;height:160px;margin-left:-80px;background:radial-gradient(circle,rgba(246,214,150,.55),transparent 65%);opacity:0;transition:opacity 1.2s .9s;z-index:2;pointer-events:none}
+.rb-fring{position:absolute;left:50%;z-index:6;opacity:0;pointer-events:none;display:none;filter:drop-shadow(0 10px 22px rgba(90,40,45,.38)) blur(6px);transition:transform 1.6s .6s cubic-bezier(.16,.84,.26,1),opacity 1s .6s,filter 1.4s .8s}
+.rb-fring.groom{width:88px;margin-left:-44px;top:20px;transform:translateY(34px) scale(.45)}
+.rb-fring.bride{width:124px;margin-left:-62px;top:10px;transform:translateY(52px) scale(.45);transition-delay:.95s}
+#ringbox.has-photo .rb-fring{display:block}
+#ringbox.has-photo .rb-ring{display:none}
+.rb-halo{position:absolute;left:50%;border-radius:50%;background:radial-gradient(circle,rgba(255,236,200,.8),rgba(255,236,200,0) 68%);opacity:0;z-index:3;pointer-events:none;transition:opacity 1.6s 1.4s}
+.rb-halo.hg{width:130px;height:130px;margin-left:-105px;top:-133px}
+.rb-halo.hb{width:170px;height:170px;margin-left:-57px;top:-108px}
+#ringbox.open{perspective:700px}
+#ringbox.open .rb-lid{transform:rotateX(-112deg);opacity:.92}
+#ringbox.open .rb-ring{opacity:1;transform:translateY(-20px) scale(1)}
+#ringbox.open .rb-fring{opacity:1;filter:drop-shadow(0 10px 22px rgba(90,40,45,.38)) blur(0)}
+#ringbox.open .rb-fring.groom{transform:translate(-40px,-110px) scale(1) rotate(-10deg);animation:bobG 4.6s ease-in-out 2.6s infinite}
+#ringbox.open .rb-fring.bride{transform:translate(28px,-72px) scale(1) rotate(7deg);animation:bobB 4.6s ease-in-out 3.1s infinite}
+#ringbox.open .rb-halo{opacity:1;animation:haloPulse 4.6s ease-in-out 3s infinite}
+@keyframes bobG{0%,100%{transform:translate(-40px,-110px) scale(1) rotate(-10deg);filter:drop-shadow(0 10px 22px rgba(90,40,45,.38)) blur(0) brightness(1)}50%{transform:translate(-40px,-117px) scale(1) rotate(-7.5deg);filter:drop-shadow(0 14px 26px rgba(90,40,45,.3)) blur(0) brightness(1.12)}}
+@keyframes bobB{0%,100%{transform:translate(28px,-72px) scale(1) rotate(7deg);filter:drop-shadow(0 10px 22px rgba(90,40,45,.38)) blur(0) brightness(1)}50%{transform:translate(28px,-80px) scale(1) rotate(9.5deg);filter:drop-shadow(0 14px 26px rgba(90,40,45,.3)) blur(0) brightness(1.12)}}
+@keyframes haloPulse{0%,100%{opacity:1}50%{opacity:.5}}
+#ringbox.open .rb-glow{opacity:1}
+.rb-s{position:absolute;color:#E9C48A;opacity:0;font-size:14px;z-index:7;pointer-events:none}
+#ringbox.open .rb-s{animation:spark 1.3s .75s ease-out forwards}
+@keyframes spark{0%{opacity:0;transform:translate(0,0) scale(.4)}25%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.2)}}
+.intro-hint{margin-top:34px;font-size:12px;letter-spacing:4px;color:var(--sub);opacity:0;animation:hintPulse 2.4s 1.2s infinite}
 @keyframes hintPulse{0%,100%{opacity:.9}50%{opacity:.3}}
 
+/* ── 꽃잎 캔버스 ── */
 #petals{position:fixed;inset:0;pointer-events:none;z-index:50}
 
 /* ── 히어로 ── */
@@ -241,20 +256,27 @@ footer .thanks{font-size:13px;color:var(--sub);margin:14px 0 30px;line-height:2}
 <div id="wrap">
 
   <!-- 인트로: 반지 박스 -->
-  <!-- 인트로: 봉투 개봉 -->
   <div id="intro">
-    <div class="env-stage" id="envStage">
-      <div class="letter">
-        <img src="photos/main.jpg" alt="양윤호 김예나 웨딩 사진">
-        <div class="lt-script">Save the Date</div>
-        <div class="lt-names">양윤호 ♥ 김예나</div>
-        <div class="lt-date">2026. 09. 19 SAT 2PM · 행복한 웨딩홀</div>
-      </div>
-      <div class="env-pocket"></div>
-      <div class="env-flapv"></div>
-      <img class="wax-img" src="https://d8j0ntlcm91z4.cloudfront.net/user_3Et7kTot8kEpUNSTzwOv3o9WCGx/hf_20260727_043251_cac32daf-8f4c-4547-9cac-edbacbe1cd72.png" alt="09.19 실링 왁스">
+    <div class="intro-names">Yunho &amp; Yena</div>
+    <div id="ringbox">
+      <div class="rb-glow"></div>
+      <div class="rb-halo hg"></div>
+      <div class="rb-halo hb"></div>
+      <div class="rb-inner"></div>
+      <div class="rb-ring"></div>
+      <img class="rb-fring groom" alt="신랑 반지">
+      <img class="rb-fring bride" alt="신부 반지">
+      <div class="rb-lid"></div>
+      <div class="rb-base"></div>
+      <span class="rb-s" style="left:20px;top:-30px;--dx:-26px;--dy:-44px">✦</span>
+      <span class="rb-s" style="right:14px;top:-44px;--dx:30px;--dy:-38px;animation-delay:1.15s">✦</span>
+      <span class="rb-s" style="left:66px;top:-88px;--dx:4px;--dy:-52px;animation-delay:1.5s">✧</span>
+      <span class="rb-s" style="left:36px;top:-64px;--dx:-18px;--dy:-58px;animation-delay:1.9s">✧</span>
+      <span class="rb-s" style="right:38px;top:-76px;--dx:24px;--dy:-54px;animation-delay:1.35s">✦</span>
+      <span class="rb-s" style="left:10px;top:6px;--dx:-30px;--dy:-30px;animation-delay:2.2s">✧</span>
+      <span class="rb-s" style="right:6px;top:0px;--dx:32px;--dy:-26px;animation-delay:1.7s">✧</span>
     </div>
-    <p class="intro-hint">실링 왁스를 눌러 열어보세요</p>
+    <p class="intro-hint">상자를 눌러 열어보세요</p>
   </div>
 
   <canvas id="petals"></canvas>
@@ -560,15 +582,30 @@ document.querySelectorAll('img.ph').forEach(function(img){
   }
 });
 
-/* ── 인트로: 봉투 개봉 ── */
-var envOpened = false;
-function openEnv(){
-  if(envOpened) return; envOpened = true;
-  document.getElementById('envStage').classList.add('open');
-  setTimeout(function(){ document.getElementById('intro').classList.add('hide'); }, 3100);
+/* ── 인트로: 반지 박스 열기 ── */
+var boxOpened = false;
+function openBox(){
+  if(boxOpened) return; boxOpened = true;
+  document.getElementById('ringbox').classList.add('open');
+  setTimeout(function(){ document.getElementById('intro').classList.add('hide'); }, 3400);
 }
-document.getElementById('intro').addEventListener('click', openEnv);
-setTimeout(openEnv, 5000); // 5초 동안 터치 없으면 자동 개봉
+document.getElementById('intro').addEventListener('click', openBox);
+setTimeout(openBox, 8000); // 8초 동안 터치 없으면 자동 오픈
+
+/* ── 인트로 박스에서 떠오르는 두 반지 ── */
+(function(){
+  var g = driveToImg(PHOTOS.ringGroom), b = driveToImg(PHOTOS.ringBride);
+  if(!g || !b) return;
+  var box = document.getElementById('ringbox'),
+      ig = document.querySelector('.rb-fring.groom'),
+      ib = document.querySelector('.rb-fring.bride'),
+      loaded = 0;
+  function ok(){ if(++loaded === 2) box.classList.add('has-photo'); }
+  function fail(){ box.classList.remove('has-photo'); ig.style.display = ib.style.display = 'none'; }
+  ig.onload = ok; ib.onload = ok;
+  ig.onerror = fail; ib.onerror = fail;
+  ig.src = g; ib.src = b;
+})();
 
 /* ── 꽃잎 애니메이션 ── */
 (function(){
