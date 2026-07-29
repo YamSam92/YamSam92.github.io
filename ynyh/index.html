@@ -573,6 +573,17 @@ const PHOTOS = {
             '../photos/g8.jpg',  '../photos/g18.jpg']                       // 가로 2
 };
 
+// 🔍 확대(라이트박스)용 전체 사진
+//    갤러리 타일은 인물이 크게 보이도록 잘라 쓰지만, 확대하면 자르기 전 원본 전체가 보여야 한다.
+//    아래에 적힌 사진만 photos-full 쪽 파일을 쓰고, 나머지는 타일 이미지를 그대로 확대한다.
+const FULL = {
+  'g2':'../photos/full/g2.jpg',   'g3':'../photos/full/g3.jpg',   'g4':'../photos/full/g4.jpg',
+  'g5':'../photos/full/g5.jpg',   'g7':'../photos/full/g7.jpg',   'g8':'../photos/full/g8.jpg',
+  'g11':'../photos/full/g11.jpg', 'g12':'../photos/full/g12.jpg', 'g14':'../photos/full/g14.jpg',
+  'g19':'../photos/full/g19.jpg',
+  'g20':'../photos/main.jpg'      // 메인컷 정방형본의 전체 사진 = 히어로에 쓰는 원본
+};
+
 // 🗺️ 지도 검색어
 const VENUE_QUERY = '충청남도 보령시 남포면 보령남로 195';
 
@@ -613,6 +624,8 @@ document.querySelectorAll('img.ph').forEach(function(img){
            : key === 'snap' ? PHOTOS.snap
            : (PHOTOS.gallery[parseInt(key,10)-1] || '');
   var url = driveToImg(link);
+  var nm = (link.match(/([\w-]+)\.jpg$/) || [])[1];
+  if(nm && FULL[nm]) img.dataset.full = FULL[nm];
   var ph = makePh(img.dataset.label || 'PHOTO');
   if(url){
     img.src = url;
@@ -724,7 +737,8 @@ gitems.forEach(function(item, i){
 });
 function openLb(i){
   lbIdx = i;
-  document.getElementById('lb-img').src = gitems[i].querySelector('img').src;
+  var tile = gitems[i].querySelector('img');
+  document.getElementById('lb-img').src = tile.dataset.full || tile.src;   // 잘린 타일 대신 전체 사진
   document.getElementById('lb-count').textContent = (i+1)+' / '+gitems.length;
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow='hidden';
