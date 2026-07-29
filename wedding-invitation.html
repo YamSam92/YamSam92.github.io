@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>윤호 ♥ 예나 결혼합니다</title>
 <meta property="og:title" content="양윤호 ♥ 김예나 결혼합니다">
 <meta property="og:description" content="2026년 9월 19일 토요일 오후 2시 · 행복한 웨딩홀 (충남 보령)">
@@ -256,6 +256,9 @@ footer .thanks{font-size:13px;color:var(--sub);margin:14px 0 30px;line-height:2}
 #bgm-btn.muted{color:var(--sub);opacity:.7}
 #bgm-btn.muted::after{content:'';position:absolute;left:9px;right:9px;top:50%;height:1.5px;background:var(--sub);transform:rotate(-45deg)}
 @keyframes bgmPulse{0%,100%{box-shadow:0 3px 12px rgba(201,132,140,.18)}50%{box-shadow:0 3px 16px rgba(201,132,140,.42)}}
+
+/* ── iOS 입력 확대 방지: 폼 컨트롤이 16px 미만이면 포커스 시 화면이 자동 확대됨 ── */
+.gb-form input,.gb-form textarea,.rv-select,.up-input{font-size:16px}
 </style>
 </head>
 <body>
@@ -341,24 +344,24 @@ footer .thanks{font-size:13px;color:var(--sub);margin:14px 0 30px;line-height:2}
     <div class="reveal"><div class="sec-label">Gallery</div>
     <div class="sec-title">우리의 순간들</div></div>
     <div class="gallery-grid reveal d1" id="gtrack">
-      <div class="g-item"><img class="ph" data-key="1" data-label="PHOTO 01" alt="갤러리 1"></div>
-      <div class="g-item"><img class="ph" data-key="2" data-label="PHOTO 02" alt="갤러리 2"></div>
-      <div class="g-item"><img class="ph" data-key="3" data-label="PHOTO 03" alt="갤러리 3"></div>
-      <div class="g-item"><img class="ph" data-key="4" data-label="PHOTO 04" alt="갤러리 4"></div>
-      <div class="g-item"><img class="ph" data-key="5" data-label="PHOTO 05" alt="갤러리 5"></div>
-      <div class="g-item"><img class="ph" data-key="6" data-label="PHOTO 06" alt="갤러리 6"></div>
-      <div class="g-item"><img class="ph" data-key="7" data-label="PHOTO 07" alt="갤러리 7"></div>
-      <div class="g-item"><img class="ph" data-key="8" data-label="PHOTO 08" alt="갤러리 8"></div>
-      <div class="g-item"><img class="ph" data-key="9" data-label="PHOTO 09" alt="갤러리 9"></div>
-      <div class="g-item"><img class="ph" data-key="10" data-label="PHOTO 10" alt="갤러리 10"></div>
-      <div class="g-item"><img class="ph" data-key="11" data-label="PHOTO 11" alt="갤러리 11"></div>
-      <div class="g-item"><img class="ph" data-key="12" data-label="PHOTO 12" alt="갤러리 12"></div>
-      <div class="g-item"><img class="ph" data-key="13" data-label="PHOTO 13" alt="갤러리 13"></div>
-      <div class="g-item"><img class="ph" data-key="14" data-label="PHOTO 14" alt="갤러리 14"></div>
-      <div class="g-item"><img class="ph" data-key="15" data-label="PHOTO 15" alt="갤러리 15"></div>
-      <div class="g-item"><img class="ph" data-key="16" data-label="PHOTO 16" alt="갤러리 16"></div>
-      <div class="g-item"><img class="ph" data-key="17" data-label="PHOTO 17" alt="갤러리 17"></div>
-      <div class="g-item"><img class="ph" data-key="18" data-label="PHOTO 18" alt="갤러리 18"></div>
+      <div class="g-item"><img class="ph" data-key="1" loading="lazy" decoding="async" data-label="PHOTO 01" alt="갤러리 1"></div>
+      <div class="g-item"><img class="ph" data-key="2" loading="lazy" decoding="async" data-label="PHOTO 02" alt="갤러리 2"></div>
+      <div class="g-item"><img class="ph" data-key="3" loading="lazy" decoding="async" data-label="PHOTO 03" alt="갤러리 3"></div>
+      <div class="g-item"><img class="ph" data-key="4" loading="lazy" decoding="async" data-label="PHOTO 04" alt="갤러리 4"></div>
+      <div class="g-item"><img class="ph" data-key="5" loading="lazy" decoding="async" data-label="PHOTO 05" alt="갤러리 5"></div>
+      <div class="g-item"><img class="ph" data-key="6" loading="lazy" decoding="async" data-label="PHOTO 06" alt="갤러리 6"></div>
+      <div class="g-item"><img class="ph" data-key="7" loading="lazy" decoding="async" data-label="PHOTO 07" alt="갤러리 7"></div>
+      <div class="g-item"><img class="ph" data-key="8" loading="lazy" decoding="async" data-label="PHOTO 08" alt="갤러리 8"></div>
+      <div class="g-item"><img class="ph" data-key="9" loading="lazy" decoding="async" data-label="PHOTO 09" alt="갤러리 9"></div>
+      <div class="g-item"><img class="ph" data-key="10" loading="lazy" decoding="async" data-label="PHOTO 10" alt="갤러리 10"></div>
+      <div class="g-item"><img class="ph" data-key="11" loading="lazy" decoding="async" data-label="PHOTO 11" alt="갤러리 11"></div>
+      <div class="g-item"><img class="ph" data-key="12" loading="lazy" decoding="async" data-label="PHOTO 12" alt="갤러리 12"></div>
+      <div class="g-item"><img class="ph" data-key="13" loading="lazy" decoding="async" data-label="PHOTO 13" alt="갤러리 13"></div>
+      <div class="g-item"><img class="ph" data-key="14" loading="lazy" decoding="async" data-label="PHOTO 14" alt="갤러리 14"></div>
+      <div class="g-item"><img class="ph" data-key="15" loading="lazy" decoding="async" data-label="PHOTO 15" alt="갤러리 15"></div>
+      <div class="g-item"><img class="ph" data-key="16" loading="lazy" decoding="async" data-label="PHOTO 16" alt="갤러리 16"></div>
+      <div class="g-item"><img class="ph" data-key="17" loading="lazy" decoding="async" data-label="PHOTO 17" alt="갤러리 17"></div>
+      <div class="g-item"><img class="ph" data-key="18" loading="lazy" decoding="async" data-label="PHOTO 18" alt="갤러리 18"></div>
     </div>
   </section>
 
@@ -367,7 +370,7 @@ footer .thanks{font-size:13px;color:var(--sub);margin:14px 0 30px;line-height:2}
     <div class="reveal"><div class="sec-label">Guest Snap</div>
     <div class="sec-title">저희의 스냅 작가님이 되어주세요 📷</div></div>
     <div class="snap-card reveal d1">
-      <div class="snap-frame"><img class="ph" data-key="snap" data-label="GUEST SNAP" alt="게스트스냅"></div>
+      <div class="snap-frame"><img class="ph" data-key="snap" loading="lazy" decoding="async" data-label="GUEST SNAP" alt="게스트스냅"></div>
       <p class="snap-lead">여러분의 시선으로 담은<br>저희의 가장 빛나는 순간을 선물해 주세요</p>
       <div class="snap-list">
         <b>[ 이런 순간들을 담아주세요 ]</b><br>
