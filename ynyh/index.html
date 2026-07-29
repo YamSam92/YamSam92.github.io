@@ -142,7 +142,7 @@ section{padding:70px 26px;position:relative}
      세로(2:3)  3장 = 2칸씩  /  2장 = 3칸씩(크게)
      정방형(1:1) 3장 = 2칸씩
      가로(3:2)  2장 = 3칸씩  /  1장 = 6칸(전체폭)
-   줄 구성: 세로3 · 정방3 · 가로1전체 · 정방3 · 세로2크게 · 정방3 · 들판1전체 · 세로3 · 가로2
+   줄 구성: 세로3 · 정방3 · 가로1전체 · 정방3 · 세로2크게 · 정방3 · 가로1전체 · 세로3 · 가로2
    피사체가 너무 작던 사진(main·g2·g3·g4·g5·g7·g11·g12·g14)은 얼굴이 잘리지 않는 선에서
    정방형으로 크롭해 인물이 크게 보이도록 했다.
    ⚠️ 아래 nth-child 규칙은 PHOTOS.gallery의 **사진 순서와 짝**임.
@@ -159,10 +159,10 @@ section{padding:70px 26px;position:relative}
 /* 세로 2장을 크게 보여주는 줄 (11,12번) */
 .g-item:nth-child(11),.g-item:nth-child(12){grid-column:span 3}
 /* 가로 2장 줄 (20,21번) */
-.g-item:nth-child(20),.g-item:nth-child(21){grid-column:span 3;aspect-ratio:3/2}
+.g-item:nth-child(20),.g-item:nth-child(21){grid-column:span 3;aspect-ratio:4/3}
 /* 전체폭 한 장 (7번 가로 · 16번 들판) */
 .g-item:nth-child(7){grid-column:span 6;aspect-ratio:3/2}
-.g-item:nth-child(16){grid-column:span 6;aspect-ratio:4/3}
+.g-item:nth-child(16){grid-column:span 6;aspect-ratio:3/2}
 .g-burst{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:2}
 .g-burst span{font-size:40px;color:#fff;text-shadow:0 4px 14px rgba(0,0,0,.4);opacity:0;transform:scale(0)}
 .g-item.pop .g-burst span{animation:heartPop 1s cubic-bezier(.17,.89,.32,1.27)}
@@ -568,9 +568,9 @@ const PHOTOS = {
             '../photos/g3.jpg',  '../photos/g4.jpg',  '../photos/g7.jpg',   // 정방 3
             '../photos/g10.jpg', '../photos/g13.jpg',                       // 세로 2 (크게)
             '../photos/g11.jpg', '../photos/g12.jpg', '../photos/g14.jpg',  // 정방 3
-            '../photos/g19.jpg',                                            // 들판 (전체폭)
+            '../photos/g16.jpg',                                            // 해변 마주봄 (전체폭)
             '../photos/g15.jpg', '../photos/g17.jpg', '../photos/snap.jpg', // 세로 3
-            '../photos/g16.jpg', '../photos/g18.jpg']                       // 가로 2
+            '../photos/g19.jpg', '../photos/g18.jpg']                       // 가로 2
 };
 
 // 🗺️ 지도 검색어
