@@ -658,9 +658,9 @@ setTimeout(openBox, 8000); // 8초 동안 터치 없으면 자동 오픈
       vy: 0.6+Math.random()*1.1, vx: 0.3-Math.random()*0.6,
       sway: Math.random()*Math.PI*2, swaySpd: 0.008+Math.random()*0.02,
       rot: Math.random()*Math.PI*2, rotSpd: 0.01-Math.random()*0.02,
-      op: 0.5+Math.random()*0.4, hue: Math.random()<.5 ? '#F0C8CC' : '#E8B4B8' };
+      op: 0.16+Math.random()*0.16, hue: Math.random()<.5 ? '#F0C8CC' : '#E8B4B8' };   // 투명도 0.5~0.9 → 0.16~0.32
   }
-  for(var i=0;i<26;i++){ var p=make(); p.y = Math.random()*H; petals.push(p); }
+  for(var i=0;i<10;i++){ var p=make(); p.y = Math.random()*H; petals.push(p); }   // 꽃잎 개수 26 → 10
   function draw(){
     ctx.clearRect(0,0,W,H);
     petals.forEach(function(p){
