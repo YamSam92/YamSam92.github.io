@@ -1077,7 +1077,7 @@ document.addEventListener('DOMContentLoaded', function(){
   a.volume = 0.45;
   a.setAttribute('playsinline','');
   // 3곡 중 랜덤 재생
-  var BGM_TRACKS = ['../bgm1.mp3', '../bgm3.mp3'];   // 2번곡은 사용자 요청으로 제외(파일은 저장소에 남아있음)
+  var BGM_TRACKS = ['../bgm1.mp3', '../bgm2.mp3'];   // 3번곡 제외(파일은 저장소에 남아있어 배열에 다시 넣으면 복구됨)
   var BGM_PICK = BGM_TRACKS[Math.floor(Math.random() * BGM_TRACKS.length)];
   a.src = BGM_PICK;
   function setBtn(){
