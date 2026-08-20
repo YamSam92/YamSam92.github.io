@@ -282,6 +282,20 @@ footer .thanks{font-size:13px;color:var(--sub);margin:14px 0 30px;line-height:2}
 
 /* ── iOS 입력 확대 방지: 폼 컨트롤이 16px 미만이면 포커스 시 화면이 자동 확대됨 ── */
 .gb-form input,.gb-form textarea,.rv-select,.up-input{font-size:16px}
+
+/* ── 구형 폰(aspect-ratio 미지원, iOS 14 이하) 폴백 ──
+   지원 브라우저에서는 이 블록이 통째로 무시된다 */
+@supports not (aspect-ratio: 1 / 1) {
+  .hero-frame img{height:420px}
+  .snap-frame img{height:312px}
+  .g-item{height:178px}
+  .g-item:nth-child(4),.g-item:nth-child(5),.g-item:nth-child(6),
+  .g-item:nth-child(8),.g-item:nth-child(9),.g-item:nth-child(10),
+  .g-item:nth-child(13),.g-item:nth-child(14),.g-item:nth-child(15){height:119px}
+  .g-item:nth-child(11),.g-item:nth-child(12){height:274px}
+  .g-item:nth-child(20),.g-item:nth-child(21){height:137px}
+  .g-item:nth-child(7),.g-item:nth-child(16){height:249px}
+}
 </style>
 </head>
 <body>
@@ -691,10 +705,16 @@ setTimeout(openBox, 8000); // 8초 동안 터치 없으면 자동 오픈
 })();
 
 /* ── 스크롤 리빌 ── */
-var io = new IntersectionObserver(function(entries){
-  entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('on'); io.unobserve(e.target); } });
-},{threshold:0.12});
-document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+/* 구형 브라우저(iOS 12 이하 등)에는 IntersectionObserver가 없어
+   이 가드가 없으면 .reveal(opacity:0)이 영영 안 나타나 본문이 통째로 안 보인다 */
+if('IntersectionObserver' in window){
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('on'); io.unobserve(e.target); } });
+  },{threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+}else{
+  document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('on'); });
+}
 
 /* ── 캘린더 ── */
 (function(){
@@ -1104,11 +1124,7 @@ document.addEventListener('DOMContentLoaded', function(){
       if(wasPlaying) tryPlay();   // 첫 제스처로 이미 언락된 경우 이어서 재생
     }catch(e){}
   }).catch(function(){});
-  // 첫 사용자 상호작용(인트로 탭 등) 시 재생 시작
-  function onFirst(){ tryPlay(); setBtn(); }
-  ['pointerdown','touchend','click','keydown'].forEach(function(ev){
-    document.addEventListener(ev, onFirst, {once:true});
-  });
+  // 자동재생 없음(회사 등에서 열 때 당황하지 않도록) — 우하단 ♫ 버튼으로만 재생
   setBtn();
 });
 </script>
