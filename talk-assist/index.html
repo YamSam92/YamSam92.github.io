@@ -5,16 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
     <title>Talk Assist</title>
     <style>
-      html, body {
+      /* Even 앱 화면은 페이지 전체 스크롤이 막혀 있을 수 있어서, body 안에서 직접 스크롤 */
+      html { height: 100%; overflow: hidden; }
+      body {
         margin: 0;
         height: 100%;
-        /* Kill WebView zoom + iOS auto-sizing + rubber-band scroll. */
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
         touch-action: manipulation;
         -webkit-text-size-adjust: 100%;
-        overscroll-behavior: none;
       }
     </style>
-    <script type="module" crossorigin src="./assets/index-De4MPNE-.js"></script>
+    <script type="module" crossorigin src="./assets/index-D0y4exBE.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/dist-DaKccuR9.js">
   </head>
   <body>
