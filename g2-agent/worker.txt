@@ -8,7 +8,7 @@
 //   NEIS_KEY        나이스 인증키
 // 일반 변수 (선택)
 //   OPENAI_MODEL    기본 gpt-6-luna
-//   OPENAI_EFFORT   생각 강도 none|low|medium (기본 none: 가장 빠름)
+//   OPENAI_EFFORT   생각 강도 none|low|medium (기본 low: 측정해 보니 none과 속도는 비슷하고 답이 더 정확함)
 //   SCHOOL_OFFICE / SCHOOL_CODE / SCHOOL_NAME / GRADE / CLASS_NM  기본 청라초 5학년 1반
 
 const DEFAULT_SCHOOL = { office: 'N10', code: '8171044', name: '청라초등학교', grade: '5', cls: '1' }
@@ -116,12 +116,26 @@ const TOOLS = [
 async function ask(env, input, opt = {}) {
   if (!input.length) return '무엇을 도와드릴까요?'
   if (!env.OPENAI_API_KEY) return 'OpenAI 키가 아직 설정되지 않았어요.'
+  // 급식·시간표 질문이면 오늘·다음 학교 가는 날 자료를 미리 받아 넣어서 도구 왕복(약 1~2초)을 줄임
+  let extra = ''
+  const last = input[input.length - 1]?.content || ''
+  if (/급식|점심|밥|메뉴|반찬|시간표|교시|수업|과목/.test(last)) {
+    try {
+      const n = seoulNow()
+      const today = new Date(Date.UTC(n.y, n.m - 1, n.d))
+      const next = new Date(today)
+      do { next.setUTCDate(next.getUTCDate() + 1) } while (next.getUTCDay() === 0 || next.getUTCDay() === 6)
+      const fmt = d => `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}`
+      const [a, b] = await Promise.all([runTool(env, 'school_day', { date: fmt(today) }), runTool(env, 'school_day', { date: fmt(next) })])
+      extra = `\n\n[미리 가져온 나이스 자료 — 이 날짜면 도구를 부르지 말고 바로 답해]\n오늘 ${JSON.stringify(a)}\n다음 학교 가는 날 ${JSON.stringify(b)}`
+    } catch { /* 실패하면 도구로 받음 */ }
+  }
   let payload = {
     model: opt.model || env.OPENAI_MODEL || 'gpt-6-luna',
-    instructions: instructions(env),
+    instructions: instructions(env) + extra,
     input,
     tools: TOOLS,
-    reasoning: { effort: opt.effort || env.OPENAI_EFFORT || 'none' },
+    reasoning: { effort: opt.effort || env.OPENAI_EFFORT || 'low' },
     max_output_tokens: 700,
   }
   for (let round = 0; round < 4; round++) {
