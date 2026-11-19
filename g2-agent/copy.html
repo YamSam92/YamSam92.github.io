@@ -1,0 +1,10 @@
+<!doctype html><meta charset="utf-8"><title>copy</title>
+<button id="b" style="position:fixed;left:0;top:0;width:100vw;height:100vh;font-size:48px">코드 복사</button>
+<script>
+let code = '';
+fetch('worker.txt?' + Date.now()).then(r => r.text()).then(t => { code = t; document.getElementById('b').textContent = '코드 복사 (' + t.length + '자)' });
+document.getElementById('b').onclick = async () => {
+  try { await navigator.clipboard.writeText(code); document.getElementById('b').textContent = '복사됨 ' + code.length }
+  catch (e) { document.getElementById('b').textContent = '실패 ' + e }
+};
+</script>
