@@ -1,0 +1,238 @@
+// G2 안경용 AI 비서 (Even 앱 → 설정 → Add Agent 에 연결)
+// Even 앱이 OpenAI chat.completions 형식으로 질문을 보내면, GPT(웹 검색 + 나이스 급식·시간표·학사일정)로 답해서
+// 같은 형식으로 돌려준다. 안경 화면에 맞게 짧은 한국어로 답한다.
+//
+// 비밀값 (Cloudflare → Worker → Settings → Variables and Secrets)
+//   G2_TOKEN        Even 앱에 넣는 토큰 (Add Agent의 Token 칸)
+//   OPENAI_API_KEY  OpenAI 키
+//   NEIS_KEY        나이스 인증키
+// 일반 변수 (선택)
+//   OPENAI_MODEL    기본 gpt-6-luna
+//   SCHOOL_OFFICE / SCHOOL_CODE / SCHOOL_NAME / GRADE / CLASS_NM  기본 청라초 5학년 1반
+
+const DEFAULT_SCHOOL = { office: 'N10', code: '8171044', name: '청라초등학교', grade: '5', cls: '1' }
+const WD = ['일', '월', '화', '수', '목', '금', '토']
+
+export default {
+  async fetch(req, env) {
+    if (req.method === 'OPTIONS') return cors(new Response(null, { status: 204 }))
+    if (req.method === 'GET') return cors(json({ ok: true, name: 'G2 agent' }))
+    if (req.method !== 'POST') return cors(json({ error: 'POST only' }, 405))
+
+    // 토큰 확인 (Bearer 토큰 또는 x-api-key)
+    const auth = req.headers.get('authorization') || ''
+    const token = auth.replace(/^Bearer\s+/i, '').trim() || req.headers.get('x-api-key') || ''
+    if (!env.G2_TOKEN || token !== env.G2_TOKEN) return cors(json({ error: { message: 'unauthorized' } }, 401))
+
+    let body
+    try { body = await req.json() } catch { return cors(json({ error: { message: 'bad json' } }, 400)) }
+
+    let answer
+    try {
+      answer = await ask(env, toInput(body))
+    } catch (err) {
+      answer = `오류가 났어요: ${String(err.message || err).slice(0, 80)}`
+    }
+    return cors(body.stream ? sse(answer) : json(completion(answer)))
+  },
+}
+
+// ── Even 앱 요청 → GPT 입력 ─────────────────────────────────────────
+function toInput(body) {
+  const text = c => typeof c === 'string' ? c
+    : Array.isArray(c) ? c.map(p => p.text ?? p.input_text ?? '').join(' ') : String(c ?? '')
+  let msgs = Array.isArray(body.messages) ? body.messages : []
+  if (!msgs.length && (body.input || body.prompt || body.text)) msgs = [{ role: 'user', content: body.input || body.prompt || body.text }]
+  return msgs
+    .filter(m => m.role === 'user' || m.role === 'assistant')
+    .slice(-10)
+    .map(m => ({ role: m.role, content: text(m.content) }))
+    .filter(m => m.content.trim())
+}
+
+// ── 오늘 날짜 (서울) ────────────────────────────────────────────────
+function seoulNow() {
+  const d = new Date(Date.now() + 9 * 3600 * 1000)
+  return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate(), wd: d.getUTCDay(), hh: d.getUTCHours(), mm: d.getUTCMinutes() }
+}
+const pad = n => String(n).padStart(2, '0')
+
+function instructions(env) {
+  const n = seoulNow()
+  const s = school(env)
+  return [
+    '너는 스마트안경(Even G2) 화면에 뜨는 개인 비서야. 사용자는 초등학교 교사야.',
+    `지금은 ${n.y}년 ${n.m}월 ${n.d}일 (${WD[n.wd]}) ${pad(n.hh)}:${pad(n.mm)}, 한국 시간이야.`,
+    `사용자의 학교는 ${s.name}, 담임 학급은 ${s.grade}학년 ${s.cls}반이야. 급식·시간표·학사일정은 school_day, school_events 도구로 확인해. "오늘/내일/다음 주" 같은 말은 위 날짜 기준으로 계산해.`,
+    '날씨·뉴스·주가·영업시간처럼 바뀌는 정보는 web_search로 확인하고 답해.',
+    '답은 한국어로, 안경 화면에 맞게 짧게: 보통 1~3줄, 한 줄에 25자 안팎. 마크다운·이모지·표·링크·출처 표기는 쓰지 마.',
+    '목록은 줄바꿈으로 나누고 핵심 숫자나 사실을 먼저 말해. 모르면 모른다고 짧게 말해.',
+  ].join('\n')
+}
+
+function school(env) {
+  return {
+    office: env.SCHOOL_OFFICE || DEFAULT_SCHOOL.office,
+    code: env.SCHOOL_CODE || DEFAULT_SCHOOL.code,
+    name: env.SCHOOL_NAME || DEFAULT_SCHOOL.name,
+    grade: env.GRADE || DEFAULT_SCHOOL.grade,
+    cls: env.CLASS_NM || DEFAULT_SCHOOL.cls,
+  }
+}
+
+const TOOLS = [
+  { type: 'web_search', search_context_size: 'low', user_location: { type: 'approximate', country: 'KR', timezone: 'Asia/Seoul' } },
+  {
+    type: 'function',
+    name: 'school_day',
+    description: '사용자 학교의 하루 급식 메뉴와 담임 학급 시간표를 나이스에서 가져온다.',
+    parameters: {
+      type: 'object',
+      properties: { date: { type: 'string', description: 'YYYYMMDD (한국 날짜)' } },
+      required: ['date'], additionalProperties: false,
+    },
+    strict: true,
+  },
+  {
+    type: 'function',
+    name: 'school_events',
+    description: '사용자 학교의 학사일정(행사·방학·휴업일)을 기간으로 가져온다. 토요휴업일은 빠져 있다.',
+    parameters: {
+      type: 'object',
+      properties: {
+        from: { type: 'string', description: 'YYYYMMDD' },
+        to: { type: 'string', description: 'YYYYMMDD (최대 6개월)' },
+      },
+      required: ['from', 'to'], additionalProperties: false,
+    },
+    strict: true,
+  },
+]
+
+// ── GPT 호출 (도구 호출이 있으면 실행해서 다시 보냄, 최대 4번) ─────────
+async function ask(env, input) {
+  if (!input.length) return '무엇을 도와드릴까요?'
+  if (!env.OPENAI_API_KEY) return 'OpenAI 키가 아직 설정되지 않았어요.'
+  let payload = {
+    model: env.OPENAI_MODEL || 'gpt-6-luna',
+    instructions: instructions(env),
+    input,
+    tools: TOOLS,
+    reasoning: { effort: 'low' },
+    max_output_tokens: 700,
+  }
+  for (let round = 0; round < 4; round++) {
+    const res = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', Authorization: `Bearer ${env.OPENAI_API_KEY}` },
+      body: JSON.stringify(payload),
+    })
+    if (!res.ok) throw new Error(`GPT ${res.status} ${(await res.text()).slice(0, 120)}`)
+    const data = await res.json()
+    const calls = (data.output || []).filter(o => o.type === 'function_call')
+    if (!calls.length) return outputText(data) || '답을 만들지 못했어요.'
+    const outputs = []
+    for (const c of calls) {
+      let result
+      try { result = await runTool(env, c.name, JSON.parse(c.arguments || '{}')) } catch (e) { result = { error: String(e.message || e) } }
+      outputs.push({ type: 'function_call_output', call_id: c.call_id, output: JSON.stringify(result) })
+    }
+    payload = { ...payload, previous_response_id: data.id, input: outputs }
+  }
+  return '답을 만들지 못했어요.'
+}
+
+function outputText(data) {
+  if (data.output_text) return clean(data.output_text)
+  let t = ''
+  for (const item of data.output || []) {
+    if (item.type !== 'message') continue
+    for (const c of item.content || []) if (c.text) t += c.text
+  }
+  return clean(t)
+}
+
+// 마크다운·출처 표시 제거
+function clean(t) {
+  return t
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[*_#`>]/g, '')
+    .replace(/\(\s*\)/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
+// ── 나이스 ──────────────────────────────────────────────────────────
+async function neis(env, svc, params) {
+  const q = new URLSearchParams({ Type: 'json', pIndex: '1', pSize: '300', ...params })
+  if (env.NEIS_KEY) q.set('KEY', env.NEIS_KEY)
+  const res = await fetch(`https://open.neis.go.kr/hub/${svc}?${q}`)
+  const j = await res.json()
+  if (j.RESULT) return []
+  return j[svc]?.[1]?.row ?? []
+}
+
+async function runTool(env, name, args) {
+  const s = school(env)
+  const base = { ATPT_OFCDC_SC_CODE: s.office, SD_SCHUL_CODE: s.code }
+  if (name === 'school_day') {
+    const ymd = String(args.date).replace(/\D/g, '')
+    const m = Number(ymd.slice(4, 6))
+    const y = Number(ymd.slice(0, 4))
+    const ay = String(m <= 2 ? y - 1 : y), sem = m >= 3 && m <= 8 ? '1' : '2'
+    const [meals, periods] = await Promise.all([
+      neis(env, 'mealServiceDietInfo', { ...base, MLSV_YMD: ymd }),
+      neis(env, 'elsTimetable', { ...base, AY: ay, SEM: sem, ALL_TI_YMD: ymd, GRADE: s.grade, CLASS_NM: s.cls }),
+    ])
+    const seen = new Map()
+    for (const r of periods) if (!seen.has(Number(r.PERIO))) seen.set(Number(r.PERIO), r.ITRT_CNTNT)
+    return {
+      date: ymd,
+      meals: meals.map(r => ({
+        kind: r.MMEAL_SC_NM,
+        dishes: String(r.DDISH_NM || '').split(/<br\s*\/?>/i).map(d => d.replace(/\([\d.\s]+\)/g, '').replace(/\*/g, '·').trim()).filter(Boolean),
+        kcal: r.CAL_INFO,
+      })),
+      timetable: [...seen.entries()].sort((a, b) => a[0] - b[0]).map(([no, subject]) => `${no}교시 ${subject}`),
+      note: meals.length || periods.length ? undefined : '이 날은 급식·시간표 자료가 없음 (주말·방학·휴업일일 수 있음)',
+    }
+  }
+  if (name === 'school_events') {
+    const rows = await neis(env, 'SchoolSchedule', { ...base, AA_FROM_YMD: String(args.from).replace(/\D/g, ''), AA_TO_YMD: String(args.to).replace(/\D/g, '') })
+    return rows
+      .filter(r => r.EVENT_NM && r.EVENT_NM !== '토요휴업일')
+      .map(r => ({ date: r.AA_YMD, name: r.EVENT_NM, day_off: r.SBTR_DD_SC_NM === '휴업일' }))
+  }
+  return { error: `unknown tool ${name}` }
+}
+
+// ── 응답 형식 ───────────────────────────────────────────────────────
+function completion(text) {
+  return {
+    id: `chatcmpl-${crypto.randomUUID()}`,
+    object: 'chat.completion',
+    created: Math.floor(Date.now() / 1000),
+    model: 'g2-agent',
+    choices: [{ index: 0, message: { role: 'assistant', content: text }, finish_reason: 'stop' }],
+    usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+  }
+}
+
+function sse(text) {
+  const id = `chatcmpl-${crypto.randomUUID()}`
+  const created = Math.floor(Date.now() / 1000)
+  const chunk = (delta, finish = null) => `data: ${JSON.stringify({ id, object: 'chat.completion.chunk', created, model: 'g2-agent', choices: [{ index: 0, delta, finish_reason: finish }] })}\n\n`
+  const body = chunk({ role: 'assistant', content: text }) + chunk({}, 'stop') + 'data: [DONE]\n\n'
+  return new Response(body, { headers: { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache' } })
+}
+
+function json(obj, status = 200) {
+  return new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json; charset=utf-8' } })
+}
+
+function cors(res) {
+  res.headers.set('access-control-allow-origin', '*')
+  res.headers.set('access-control-allow-headers', 'authorization, content-type, x-api-key')
+  res.headers.set('access-control-allow-methods', 'GET, POST, OPTIONS')
+  return res
+}
